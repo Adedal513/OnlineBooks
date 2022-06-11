@@ -40,7 +40,7 @@ def download_image(url: str, folder: Union[str, Path], filename='') -> str:
     return file_path
 
 
-def parse_book_credentials(book_id: int) -> (str, str, str):
+def parse_book_credentials(book_id: int) -> (str, str, str, [str]):
     book_response = requests.get(
         url=f'{BASE_URL}b{book_id}'
     )
@@ -53,8 +53,9 @@ def parse_book_credentials(book_id: int) -> (str, str, str):
     title = soup.find('h1').text.split('::')[0].strip()
     author = soup.find('h1').text.split('::')[1].strip()
     image = soup.find('div', class_='bookimage').find('img')['src']
+    comments_list = [comment.find('span', class_='black').text for comment in soup.find_all('div', class_='texts')]
 
-    return title, author, image
+    return title, author, image, comments_list
 
 
 def download_txt(url: str, filename: str, folder: Union[str, Path]) -> str:
@@ -86,7 +87,7 @@ def download_book(book_id: int) -> bool:
     txt_request_url = f'{BASE_URL}txt.php?' + urlencode(params)
 
     try:
-        title, author, image = parse_book_credentials(book_id)
+        title, author, image, comments_list = parse_book_credentials(book_id)
         book_filename = f'{title} [{author}]'
 
         download_txt(
