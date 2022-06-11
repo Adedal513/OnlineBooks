@@ -40,7 +40,7 @@ def download_image(url: str, folder: Union[str, Path], filename='') -> str:
     return file_path
 
 
-def parse_book_credentials(book_id: int) -> (str, str, str, [str]):
+def parse_book_credentials(book_id: int) -> (str, str, str, [str], str):
     book_response = requests.get(
         url=f'{BASE_URL}b{book_id}'
     )
@@ -54,8 +54,9 @@ def parse_book_credentials(book_id: int) -> (str, str, str, [str]):
     author = soup.find('h1').text.split('::')[1].strip()
     image = soup.find('div', class_='bookimage').find('img')['src']
     comments_list = [comment.find('span', class_='black').text for comment in soup.find_all('div', class_='texts')]
+    genres = [genre.text for genre in soup.find('span', class_='d_book').find_all('a')]
 
-    return title, author, image, comments_list
+    return title, author, image, comments_list, genres
 
 
 def download_txt(url: str, filename: str, folder: Union[str, Path]) -> str:
@@ -112,6 +113,7 @@ def download_book(book_id: int) -> bool:
 
 
 if __name__ == '__main__':
+    print(parse_book_credentials(45))
 
-    for book_id in range(11):
-        download_book(book_id)
+    # for book_id in range(11):
+    #     download_book(book_id)
