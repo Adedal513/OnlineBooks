@@ -1,5 +1,4 @@
-import urllib.parse
-
+import argparse
 import requests
 import os
 
@@ -40,7 +39,7 @@ def download_image(url: str, folder: Union[str, Path], filename='') -> str:
     return file_path
 
 
-def parse_book_credentials(book_id: int) -> (str, str, str, [str], str):
+def parse_book_page(book_id: int) -> (str, str, str, [str], str):
     book_response = requests.get(
         url=f'{BASE_URL}b{book_id}'
     )
@@ -88,7 +87,7 @@ def download_book(book_id: int) -> bool:
     txt_request_url = f'{BASE_URL}txt.php?' + urlencode(params)
 
     try:
-        title, author, image, comments_list = parse_book_credentials(book_id)
+        title, author, image, comments_list, genres = parse_book_page(book_id)
         book_filename = f'{title} [{author}]'
 
         download_txt(
@@ -113,7 +112,11 @@ def download_book(book_id: int) -> bool:
 
 
 if __name__ == '__main__':
-    print(parse_book_credentials(45))
+    parser = argparse.ArgumentParser(description="Скачивание книг с веб-ресурса tululu.org")
+    parser.add_argument('start', help='start index', type=int, default=1)
+    parser.add_argument('end', help='end index', type=int)
 
-    # for book_id in range(11):
-    #     download_book(book_id)
+    args = parser.parse_args()
+
+    for book_id in range(args.start, args.end + 1):
+        download_book(book_id)
