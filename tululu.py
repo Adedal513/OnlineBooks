@@ -104,6 +104,8 @@ def download_book(book_id: int) -> bool:
             filename=title
         )
 
+        print(f'Название: {title}\nАвтор: {author}\n')
+
     except requests.exceptions.HTTPError:
         print(f'No book or cover with index {book_id} found :(')
         return False
