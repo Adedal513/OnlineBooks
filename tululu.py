@@ -28,8 +28,7 @@ def download_image(url: str, folder: Union[str, Path], filename='') -> str:
     response.raise_for_status()
     check_for_redirect(response)
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(folder, exist_ok=True)
 
     file_path = join(folder, filename)
 
@@ -73,8 +72,7 @@ def download_txt(url: str, filename: str, folder: Union[str, Path], params=None)
 
     filename_sanitized = sanitize_filename(filename) + '.txt'
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    os.makedirs(folder, exist_ok=True)
 
     file_path = join(folder, filename_sanitized)
 
