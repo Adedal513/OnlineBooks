@@ -52,10 +52,14 @@ def parse_book_page(book_id: int) -> (str, str, str, [str], str):
 
     title, author = soup.find('h1').text.split('::')
     image = soup.find('div', class_='bookimage').find('img')['src']
-    comments_list = [comment.find('span', class_='black').text for comment in soup.find_all('div', class_='texts')]
-    genres = [genre.text for genre in soup.find('span', class_='d_book').find_all('a')]
 
-    return title.strip(), author.strip(), image, comments_list, genres
+    comments = soup.find_all('div', class_='texts')
+    genres = soup.find('span', class_='d_book').find_all('a')
+
+    comments_serialized = [comment.find('span', class_='black').text for comment in comments]
+    genres_serialized = [genre.text for genre in genres]
+
+    return title.strip(), author.strip(), image, comments_serialized, genres_serialized
 
 
 def download_txt(url: str, filename: str, folder: Union[str, Path], params=None) -> str:
