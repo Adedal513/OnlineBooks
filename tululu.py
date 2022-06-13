@@ -40,8 +40,9 @@ def download_image(url: str, folder: Union[str, Path], filename='') -> str:
 
 
 def parse_book_page(book_id: int) -> (str, str, str, [str], str):
+    book_html_url = f'{BASE_URL}b{book_id}'
     book_response = requests.get(
-        url=f'{BASE_URL}b{book_id}'
+        url=book_html_url
     )
 
     book_response.raise_for_status()
@@ -63,7 +64,7 @@ def download_txt(url: str, filename: str, folder: Union[str, Path], params=None)
         params = {}
 
     response = requests.get(url=url, params=params)
-    
+
     response.raise_for_status()
     check_for_redirect(response)
 
@@ -85,7 +86,7 @@ def check_for_redirect(response: requests.Response):
         raise requests.exceptions.HTTPError
 
 
-def download_book(book_id: int) -> bool:
+def download_book(book_id: int, only_parsing_mode: bool, silent_mode: bool) -> bool:
     params = {'id': book_id}
     txt_request_url = f'{BASE_URL}txt.php'
 
@@ -93,25 +94,27 @@ def download_book(book_id: int) -> bool:
         title, author, image, comments_list, genres = parse_book_page(book_id)
         book_filename = f'{title} [{author}]'
 
-        download_txt(
-            url=txt_request_url,
-            filename=book_filename,
-            folder=LIBRARY_FOLDER_NAME,
-            params=params
-        )
+        if not only_parsing_mode:
+            download_txt(
+                url=txt_request_url,
+                filename=book_filename,
+                folder=LIBRARY_FOLDER_NAME,
+                params=params
+            )
 
-        cover_request_url = f'{BASE_URL}{image}'
+            cover_request_url = f'{BASE_URL}{image}'
 
-        download_image(
-            url=cover_request_url,
-            folder=COVER_FOLDER_NAME,
-            filename=title
-        )
+            download_image(
+                url=cover_request_url,
+                folder=COVER_FOLDER_NAME,
+                filename=title
+            )
 
-        print(f'Название: {title}\nАвтор: {author}\n')
+        if not silent_mode:
+            print(f'Название: {title}\nАвтор: {author}\n')
 
     except requests.exceptions.HTTPError:
-        print(f'No book or cover with index {book_id} found :(')
+        print(f'No book or cover with index {book_id} found :(\n')
         return False
 
     return True
@@ -121,8 +124,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Скачивание книг с веб-ресурса tululu.org")
     parser.add_argument('--start', help='start index', type=int, default=1)
     parser.add_argument('end', help='end index', type=int)
+    parser.add_argument('--parse_only', help='to only show books info without downloading', action='store_true')
+    parser.add_argument('--silent', help='Turn off description show', action='store_true')
 
     args = parser.parse_args()
 
     for book_id in range(args.start, args.end + 1):
-        download_book(book_id)
+        download_book(book_id, only_parsing_mode=args.parse_only, silent_mode=args.silent)
