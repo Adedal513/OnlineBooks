@@ -7,7 +7,7 @@ from os.path import join
 from typing import Union
 from pathlib import Path
 from bs4 import BeautifulSoup
-from urllib.parse import urlencode, urlsplit, unquote
+from urllib.parse import urlencode, urlsplit, unquote, urljoin
 from pathvalidate import sanitize_filename
 
 
@@ -89,7 +89,7 @@ def check_for_redirect(response: requests.Response):
 
 def download_book(book_id: int, only_parsing_mode: bool, silent_mode: bool) -> bool:
     params = {'id': book_id}
-    txt_request_url = f'{BASE_URL}txt.php'
+    txt_request_url = urljoin(BASE_URL, 'txt.php')
 
     try:
         title, author, image, comments_list, genres = parse_book_page(book_id)
@@ -103,7 +103,7 @@ def download_book(book_id: int, only_parsing_mode: bool, silent_mode: bool) -> b
                 params=params
             )
 
-            cover_request_url = f'{BASE_URL}{image}'
+            cover_request_url = urljoin(BASE_URL, image)
 
             download_image(
                 url=cover_request_url,
