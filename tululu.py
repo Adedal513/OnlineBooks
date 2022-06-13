@@ -93,39 +93,32 @@ def download_book(book_id: int, only_parsing_mode: bool, silent_mode: bool) -> b
     params = {'id': book_id}
     txt_request_url = urljoin(BASE_URL, 'txt.php')
 
-    try:
-        title, author, image, comments_list, genres = parse_book_page(book_id)
-        book_filename = f'{title} [{author}]'
+    title, author, image, comments_list, genres = parse_book_page(book_id)
 
-        if not only_parsing_mode:
-            download_txt(
-                url=txt_request_url,
-                filename=book_filename,
-                folder=LIBRARY_FOLDER_NAME,
-                params=params
-            )
+    book_filename = f'{title} [{author}]'
 
-            cover_request_url = urljoin(BASE_URL, image)
+    if not only_parsing_mode:
+        download_txt(
+            url=txt_request_url,
+            filename=book_filename,
+            folder=LIBRARY_FOLDER_NAME,
+            params=params
+        )
 
-            download_image(
-                url=cover_request_url,
-                folder=COVER_FOLDER_NAME,
-                filename=title
-            )
+        cover_request_url = urljoin(BASE_URL, image)
 
-        if not silent_mode:
-            book_description = f'''\
-            Название: {title}
-            Автор: {author}
-            '''
-            print(dedent(book_description))
+        download_image(
+            url=cover_request_url,
+            folder=COVER_FOLDER_NAME,
+            filename=title
+        )
 
-    except requests.exceptions.HTTPError:
-        print(f'No book or cover with index {book_id} found :(\n')
-
-        return False
-
-    return True
+    if not silent_mode:
+        book_description = f'''\
+        Название: {title}
+        Автор: {author}
+        '''
+        print(dedent(book_description))
 
 
 if __name__ == '__main__':
@@ -138,5 +131,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     for book_id in range(args.start, args.end + 1):
-        if not download_book(book_id, only_parsing_mode=args.parse_only, silent_mode=args.silent):
+        try:
+            download_book(book_id, only_parsing_mode=args.parse_only, silent_mode=args.silent)
+        except requests.exceptions.HTTPError:
+            print(f'No book or cover with index {book_id} found :(')
             break
