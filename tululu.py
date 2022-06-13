@@ -82,7 +82,7 @@ def download_txt(url: str, filename: str, folder: Union[str, Path], params=None)
 
 
 def check_for_redirect(response: requests.Response):
-    if any([link.status_code == 302 for link in response.history]):
+    if 302 in [link.status_code for link in response.history]:
         raise requests.exceptions.HTTPError
 
 
