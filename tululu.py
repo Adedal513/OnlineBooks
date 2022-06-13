@@ -3,11 +3,13 @@ import requests
 import os
 
 from os.path import join
+from urllib.parse import urlencode, urlsplit, unquote, urljoin
+from textwrap import dedent
+
 
 from typing import Union
 from pathlib import Path
 from bs4 import BeautifulSoup
-from urllib.parse import urlencode, urlsplit, unquote, urljoin
 from pathvalidate import sanitize_filename
 
 
@@ -112,10 +114,15 @@ def download_book(book_id: int, only_parsing_mode: bool, silent_mode: bool) -> b
             )
 
         if not silent_mode:
-            print(f'Название: {title}\nАвтор: {author}\n')
+            book_description = f'''\
+            Название: {title}
+            Автор: {author}
+            '''
+            print(dedent(book_description))
 
     except requests.exceptions.HTTPError:
         print(f'No book or cover with index {book_id} found :(\n')
+
         return False
 
     return True
@@ -131,4 +138,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     for book_id in range(args.start, args.end + 1):
-        download_book(book_id, only_parsing_mode=args.parse_only, silent_mode=args.silent)
+        if not download_book(book_id, only_parsing_mode=args.parse_only, silent_mode=args.silent):
+            break
