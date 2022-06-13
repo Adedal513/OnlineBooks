@@ -58,9 +58,12 @@ def parse_book_page(book_id: int) -> (str, str, str, [str], str):
     return title, author, image, comments_list, genres
 
 
-def download_txt(url: str, filename: str, folder: Union[str, Path]) -> str:
-    response = requests.get(url=url)
+def download_txt(url: str, filename: str, folder: Union[str, Path], params=None) -> str:
+    if params is None:
+        params = {}
 
+    response = requests.get(url=url, params=params)
+    
     response.raise_for_status()
     check_for_redirect(response)
 
@@ -84,7 +87,7 @@ def check_for_redirect(response: requests.Response):
 
 def download_book(book_id: int) -> bool:
     params = {'id': book_id}
-    txt_request_url = f'{BASE_URL}txt.php?' + urlencode(params)
+    txt_request_url = f'{BASE_URL}txt.php'
 
     try:
         title, author, image, comments_list, genres = parse_book_page(book_id)
@@ -93,7 +96,8 @@ def download_book(book_id: int) -> bool:
         download_txt(
             url=txt_request_url,
             filename=book_filename,
-            folder=LIBRARY_FOLDER_NAME
+            folder=LIBRARY_FOLDER_NAME,
+            params=params
         )
 
         cover_request_url = f'{BASE_URL}{image}'
@@ -115,7 +119,7 @@ def download_book(book_id: int) -> bool:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Скачивание книг с веб-ресурса tululu.org")
-    parser.add_argument('start', help='start index', type=int, default=1)
+    parser.add_argument('--start', help='start index', type=int, default=1)
     parser.add_argument('end', help='end index', type=int)
 
     args = parser.parse_args()
